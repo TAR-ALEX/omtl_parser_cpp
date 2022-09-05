@@ -42,56 +42,59 @@
 #include <string>
 #include <vector>
 
-class Token {
-private:
-    friend class Tokenizer;
-    const static uint8_t name = 0;
-    const static uint8_t string = 1;
-    const static uint8_t number = 2;
-    const static uint8_t comment = 3;
+namespace omtl {
+    class Token {
+    private:
+        friend class Tokenizer;
+        const static uint8_t name = 0;
+        const static uint8_t string = 1;
+        const static uint8_t number = 2;
+        const static uint8_t comment = 3;
 
-public:
-    std::string paddingBefore = "";
-    std::string location = "";
-    std::string rawValue = "";
-    uint8_t dataType = Token::name;
-    std::string paddingAfter = "";
+    public:
+        std::string paddingBefore = "";
+        std::string location = "";
+        std::string rawValue = "";
+        uint8_t dataType = Token::name;
+        std::string paddingAfter = "";
 
-    Token() {}
-    Token(std::string s) {
-        rawValue = s;
-        dataType = Token::name;
-        if (rawValue.size() >= 2 && rawValue[0] == '\"' && rawValue[1] == '\"') dataType = Token::string;
-        if (rawValue.size() >= 2 && rawValue[0] == '(' && rawValue[1] == ')') dataType = Token::comment;
-        if (dataType == Token::name) {
-            try {
-                estd::BigDec tst = rawValue;          // if we can parse as a number
-                dataType = Token::number;             // it is a number
-            } catch (...) { dataType = Token::name; } // failed to parse, not a number
+        Token() {}
+        Token(std::string s) {
+            rawValue = s;
+            dataType = Token::name;
+            if (rawValue.size() >= 2 && rawValue[0] == '\"' && rawValue[1] == '\"') dataType = Token::string;
+            if (rawValue.size() >= 2 && rawValue[0] == '(' && rawValue[1] == ')') dataType = Token::comment;
+            if (dataType == Token::name) {
+                try {
+                    estd::BigDec tst = rawValue;          // if we can parse as a number
+                    dataType = Token::number;             // it is a number
+                } catch (...) { dataType = Token::name; } // failed to parse, not a number
+            }
         }
-    }
-    Token(std::string s, std::string c) : Token(s) { location = c; }
+        Token(std::string s, std::string c) : Token(s) { location = c; }
 
-    std::string getDiagnosticString();
-    std::string getRaw();
+        std::string getDiagnosticString();
+        std::string getRaw();
 
-    bool isString() { return dataType == Token::string; }
-    bool isComment() { return dataType == Token::comment; }
-    bool isName() { return dataType == Token::name; }
-    bool isNumber() { return dataType == Token::number; }
+        bool isString() { return dataType == Token::string; }
+        bool isComment() { return dataType == Token::comment; }
+        bool isName() { return dataType == Token::name; }
+        bool isNumber() { return dataType == Token::number; }
 
-    std::string getString();
-    std::string getEscapedString();
-    std::string getComment();
-    std::string getName();
-    estd::BigDec getNumber();
-};
+        std::string getString();
+        std::string getEscapedString();
+        std::string getComment();
+        std::string getName();
+        estd::BigDec getNumber();
+    };
 
-class Tokenizer {
-public:
-    bool storeCommentsAsPadding = true;
-    std::vector<Token> tokenize(std::istream& infile);
-    std::string reconstruct(std::vector<Token>& tokens);
-};
+    class Tokenizer {
+    public:
+        bool storeCommentsAsPadding = true;
+        std::vector<Token> tokenize(std::istream& infile);
+        std::string reconstruct(std::vector<Token>& tokens);
+    };
 
 #include <omtl/Tokenizer.ipp>
+
+} // namespace omtl
