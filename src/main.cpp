@@ -36,9 +36,8 @@ using namespace omtl;
 using namespace estd::string_util;
 
 int main() {
-    ifstream file("test.txt", ios::binary | ios::in);
     Tokenizer t;
-    auto tokens = t.tokenize(file);
+    auto tokens = t.tokenize("test.txt");
     for (Token tmp : tokens) cout << tmp.getDiagnosticString() << endl;
     cout << endl;
     cout << t.reconstruct(tokens);
