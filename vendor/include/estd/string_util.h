@@ -3,6 +3,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <vector>
 
 namespace estd {
     namespace string_util {
@@ -23,6 +24,32 @@ namespace estd {
 
         inline static bool hasPrefix(std::string str, const std::string& prefix) {
             return str.rfind(prefix, 0) != std::string::npos;
+        }
+
+        inline static std::vector<std::string> splitAll(std::string s, std::string delimiter = " ", bool includeEmpty = true) {
+            size_t pos_start = 0, pos_end, delim_len = delimiter.length();
+            std::string token;
+            std::vector<std::string> res;
+
+            while ((pos_end = s.find(delimiter, pos_start)) != std::string::npos) {
+                token = s.substr (pos_start, pos_end - pos_start);
+                pos_start = pos_end + delim_len;
+                if(token == "" && !includeEmpty) continue;
+                res.push_back (token);
+            }
+            if(s.substr (pos_start) == "" && !includeEmpty) return res;
+            res.push_back (s.substr (pos_start));
+            return res;
+        }
+
+        inline static std::string toLower(std::string s){
+            for(auto& c : s) c = tolower(c);
+            return s;
+        }
+
+        inline static std::string toUpper(std::string s){
+            for(auto& c : s) c = toupper(c);
+            return s;
         }
 
         inline static std::string indent(std::string input, std::string indentation) {
@@ -159,6 +186,7 @@ namespace estd {
             return tmp_s;
         }
 
+        // Test if is ascii whitespace
         inline static bool isWhitespace(char c) {
             const std::set whitespace = {' ', '\t', '\n', '\v', '\f', '\r'};
             return whitespace.count(c);
