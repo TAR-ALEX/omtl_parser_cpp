@@ -1,4 +1,3 @@
 git "https://github.com/TAR-ALEX/estd-string-util.git" master "./include/" "./vendor/include/",
 git "https://github.com/TAR-ALEX/big_numbers_cpp.git" master "./include/" "./vendor/include/",
-git "https://github.com/TAR-ALEX/estd_logging.git" master "./include/" "./vendor/include/",
 git "https://github.com/TAR-ALEX/clone_ptr_cpp.git" master "./include/" "./vendor/include/",

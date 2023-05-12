@@ -1,4 +1,4 @@
 "o\mtl\"\175" [hello: [22.1111111111111111111111,"string", world]]  -.0  (test) 
- "this is a test string" "this is a test string" "this is a test string",
+ "this is a test string" "this is a test string" "this is a test string", ((test))
 "this is a test string" "this is a test string" this is a test token,
 x + y + [x + z],
