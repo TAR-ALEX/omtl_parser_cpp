@@ -142,6 +142,13 @@ Element ParseTreeBuilder::parseTuple(std::vector<Token>& tokens, size_t& i, bool
         if (i + 1 < tokens.size() && tokens[i + 1].getRaw() == ":") {
             if (!tokens[i].isName()) // TODO: support strings, only names are supported for now
                 throw std::runtime_error("unexpected tag in tuple at: " + tokens[i].location);
+            if (i + 2 >= tokens.size() ||
+                tokens[i + 2].getRaw() == ","){ // we have a named item with an empty statement under it.
+                //throw std::runtime_error("empty statement in tuple at: " + tokens[i].location);
+                //skip over it instead
+                i += 3;
+                continue;
+            }
             name = tokens[i].getRaw();
             i += 2;
             statement = parseStatement(tokens, i);
@@ -338,6 +345,7 @@ Element Element::slice(size_t left, size_t right) {
 
 
 bool Element::isTuple() { return this->tuple != nullptr; }
+bool Element::isEmptyTuple() { return this->tuple != nullptr && this->tuple->size() == 0; }
 bool Element::isStatement() { return this->statement != nullptr; }
 bool Element::isToken() {
     Element& e = getSingleElement();

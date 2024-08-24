@@ -116,6 +116,7 @@ void tupleStructureTests2() {
         "one",
         two: "two",
         three: "three",
+        four: [[]],
     )"""";
     auto pt = testStrToTree(s);
 
@@ -131,10 +132,12 @@ void tupleStructureTests2() {
     tests.testBool(pt["1"][0]->getString() == "one");
     tests.testBool(pt["2"][0]->getString() == "two");
     tests.testBool(pt["3"][0]->getString() == "three");
+
+    tests.testBool(pt["four"][0][0][0]->isEmptyTuple());
 }
 
 void testFailsTuple() {
-    tests.testBlock(
+    tests.testBlock({
         bool passed = false;
         try {
             string s = R""""(
@@ -148,12 +151,12 @@ void testFailsTuple() {
             passed = estd::string_util::contains(
                 err.what(), "statement did not expect a colon at: (file: test.txt line: 4 column: 22)"
             );
-            if(!passed) std::cerr << err.what() << std::endl; 
+            if (!passed) std::cerr << err.what() << std::endl;
         }
         return passed;
-    );
+    });
 
-    tests.testBlock(
+    tests.testBlock({
         bool passed = false;
         try {
             string s = R""""(
@@ -168,12 +171,12 @@ void testFailsTuple() {
             passed = estd::string_util::contains(
                 err.what(), "unexpected tag in tuple at: (file: test.txt line: 4 column: 17)"
             );
-            if(!passed) std::cerr << err.what() << std::endl; 
+            if (!passed) std::cerr << err.what() << std::endl;
         }
         return passed;
-    );
+    });
 
-    tests.testBlock(
+    tests.testBlock({
         bool passed = false;
         try {
             string s = R""""(
@@ -188,12 +191,12 @@ void testFailsTuple() {
             passed = estd::string_util::contains(
                 err.what(), "unexpected tag in tuple at: (file: test.txt line: 4 column: 17)"
             );
-            if(!passed) std::cerr << err.what() << std::endl; 
+            if (!passed) std::cerr << err.what() << std::endl;
         }
         return passed;
-    );
+    });
 
-    tests.testBlock(
+    tests.testBlock({
         bool passed = false;
         try {
             string s = R""""(
@@ -206,15 +209,13 @@ void testFailsTuple() {
             auto pt = testStrToTree(s);
             std::cerr << pt.getDiagnosticString() << std::endl;
         } catch (std::runtime_error& err) {
-            passed = estd::string_util::contains(
-                err.what(), "tuple did not end: (file: test.txt line: 2 column: 17)"
-            );
-            if(!passed) std::cerr << err.what() << std::endl; 
+            passed = estd::string_util::contains(err.what(), "tuple did not end: (file: test.txt line: 2 column: 17)");
+            if (!passed) std::cerr << err.what() << std::endl;
         }
         return passed;
-    );
+    });
 
-    tests.testBlock(
+    tests.testBlock({
         bool passed = false;
         try {
             string s = R""""(
@@ -230,11 +231,59 @@ void testFailsTuple() {
             passed = estd::string_util::contains(
                 err.what(), "tuple too many closing braces: (file: test.txt line: 2 column: 17)"
             );
-            if(!passed) std::cerr << err.what() << std::endl; 
+            if (!passed) std::cerr << err.what() << std::endl;
         }
-        
+
         return passed;
-    );
+    });
+}
+
+
+void testIndexing() {
+    tests.testBlock({
+        string s = R""""(
+            [
+                ,
+                ,
+                20
+            ]
+        )"""";
+        auto pt = testStrToTree(s);
+        return pt[0][0][0][0]->getNumber() == "20";
+    });
+    tests.testBlock({
+        string s = R""""(
+            [
+                , (ignored, as no statement under it)
+                twenty: ,(ignored, as no statement under it)
+                20 (first actual statement in the tuple)
+            ]
+        )"""";
+        auto pt = testStrToTree(s);
+        return pt[0][0][0][0]->getNumber() == "20";
+    });
+    tests.testBlock({
+        string s = R""""(
+            [
+                one,
+                [,
+                two,]
+            ]
+        )"""";
+        auto pt = testStrToTree(s);
+        return pt[0][0][1][0][0][0]->getName() == "two";
+    });
+    tests.testBlock({
+        string s = R""""(
+            [
+                one,
+                [[],
+                two,]
+            ]
+        )"""";
+        auto pt = testStrToTree(s);
+        return pt[0][0][1][0][1][0]->getName() == "two";
+    });
 }
 
 int main() {
@@ -242,4 +291,6 @@ int main() {
     tupleStructureTests1();
     tupleStructureTests2();
     testFailsTuple();
+    testIndexing();
+    std::cout << tests.getStats() << std::endl;
 }

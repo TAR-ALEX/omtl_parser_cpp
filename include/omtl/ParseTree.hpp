@@ -86,6 +86,7 @@ namespace omtl {
         void pushBack(std::string n, Element e);
 
         bool isTuple();
+        bool isEmptyTuple();
         bool isStatement();
         bool isToken();
 

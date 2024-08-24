@@ -53,7 +53,16 @@ public:
     inline void testLambda(std::function<bool()>) { testBool(false); }
 
     std::string getStats() {
-        return std::string() + "TEST RESULTS: " + std::to_string(passedNum) + "/" + std::to_string(testNum);
+        double passedRatio = double(passedNum)/testNum;
+
+        std::string color = estd::setTextColorHSV(120, 100, 100);
+        std::string innerText = "PASS";
+
+        if(passedNum-testNum != 0){
+            color = estd::setTextColorHSV(60*passedRatio, 100, 100);
+            innerText = passedRatio > 0.75 ? "WARN" : "FAIL";            
+        }
+        return std::string() + "[" + color +innerText+ estd::clearSettings + "] TEST RESULTS: " + std::to_string(passedNum) + "/" + std::to_string(testNum);
     }
 };
 
