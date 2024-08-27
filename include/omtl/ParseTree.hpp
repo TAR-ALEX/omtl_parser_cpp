@@ -57,10 +57,11 @@ namespace omtl {
         inline Element& getSingleElement();
 
     public:
+        static Element Tuple(std::deque<std::pair<std::string, Element>> in);
+        static Element Statement(std::deque<Element> in = {});
+        static Element Tuple(std::deque<Element> in = {}); // a function that is a "constructor"
         Element();
         Element(Token v);
-        Element(std::deque<std::pair<std::string, Element>> t);
-        Element(std::deque<Element> s);
         Element(const Element& e);
         inline ~Element() {}
 
@@ -102,10 +103,12 @@ namespace omtl {
         bool onlyContains(std::set<std::string> names);
         bool contains(std::string name);
         bool contains(size_t id);
-        estd::clone_ptr<Element> operator[](std::string name);
-        estd::clone_ptr<Element> operator[](size_t id);
+        Element operator[](std::string name);
+        Element operator[](size_t id);
 
         Element slice(size_t left, size_t right = SIZE_MAX);
+        Element front();
+        Element back();
         Element popFront();
         Element popBack();
         void popFront(size_t n);
@@ -147,9 +150,6 @@ namespace omtl {
     public:
         Element buildParseTree(std::vector<Token> vector);
     };
-
-    inline static Element Tuple(std::deque<std::pair<std::string, Element>> in = {}) { return Element(in); }
-    inline static Element Statement(std::deque<Element> in = {}) { return Element(in); }
 
 #include <omtl/ParseTree.ipp>
 } // namespace omtl

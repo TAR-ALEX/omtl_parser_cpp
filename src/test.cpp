@@ -50,42 +50,42 @@ omtl::Element testStrToTree(std::string contents) {
 void literalsTests() {
     tests.testLambda([]() {
         auto pt = testStrToTree(R"(11)");
-        return pt[0][0]->getNumber() == 11;
+        return pt[0][0].getNumber() == 11;
     });
     tests.testLambda([]() {
         auto pt = testStrToTree(R"(0b11)");
-        return pt[0][0]->getNumber() == 3;
+        return pt[0][0].getNumber() == 3;
     });
     tests.testLambda([]() {
         auto pt = testStrToTree(R"(11.500)");
-        return pt[0][0]->getNumber() == 11.50;
+        return pt[0][0].getNumber() == 11.50;
     });
     tests.testLambda([]() {
         const std::string kLargeNumber = "7750231786409182364578901326401623401236478102635071238641920384761902384";
         auto pt = testStrToTree(kLargeNumber);
-        return pt[0][0]->getNumber() == kLargeNumber;
+        return pt[0][0].getNumber() == kLargeNumber;
     });
     tests.testLambda([]() {
         const std::string kLargeNumber =
             "7750231786409182364578901326401623401236478102635071238641920384761902384.0000022384716239784";
         auto pt = testStrToTree(kLargeNumber);
-        return pt[0][0]->getNumber() == kLargeNumber;
+        return pt[0][0].getNumber() == kLargeNumber;
     });
     tests.testLambda([]() {
         auto pt = testStrToTree(R"("hello world")");
-        return pt[0][0]->getString() == "hello world";
+        return pt[0][0].getString() == "hello world";
     });
     tests.testLambda([]() {
         auto pt = testStrToTree(R"(hello world)");
-        return pt[0][0]->getName() == "hello" && "world" == pt[0][1]->getName();
+        return pt[0][0].getName() == "hello" && "world" == pt[0][1].getName();
     });
     tests.testLambda([]() {
         auto pt = testStrToTree(R"(hello: world)");
-        return pt["hello"][0]->getName() == "world";
+        return pt["hello"][0].getName() == "world";
     });
     tests.testLambda([]() {
         auto pt = testStrToTree(R"(hello: "world",)");
-        return pt["hello"][0]->getString() == "world";
+        return pt["hello"][0].getString() == "world";
     });
 }
 
@@ -100,14 +100,14 @@ void tupleStructureTests1() {
     )"""";
     auto pt = testStrToTree(s);
 
-    tests.testBool(pt[0][0]["one"][0]->getName() == "two");
-    tests.testBool(pt[0][0]["one"][1]->getName() == "three");
-    tests.testBool(pt[0][0]["four"][0][0][0]->getNumber() == 5);
-    tests.testBool(pt[0][0]["four"][0][1][0][0][0]->getEscapedString() == "six\\n");
-    tests.testBool(pt[0][0][2][0]->getNumber() == "7");
-    tests.testBool(pt[0][0][3][0]->getNumber() == "8");
-    tests.testBool(pt[0][0][4][0][0][0]->getString() == "nine");
-    tests.testBool(pt[1][0]->getString() == "ten");
+    tests.testBool(pt[0][0]["one"][0].getName() == "two");
+    tests.testBool(pt[0][0]["one"][1].getName() == "three");
+    tests.testBool(pt[0][0]["four"][0][0][0].getNumber() == 5);
+    tests.testBool(pt[0][0]["four"][0][1][0][0][0].getEscapedString() == "six\\n");
+    tests.testBool(pt[0][0][2][0].getNumber() == "7");
+    tests.testBool(pt[0][0][3][0].getNumber() == "8");
+    tests.testBool(pt[0][0][4][0][0][0].getString() == "nine");
+    tests.testBool(pt[1][0].getString() == "ten");
 }
 
 void tupleStructureTests2() {
@@ -120,20 +120,20 @@ void tupleStructureTests2() {
     )"""";
     auto pt = testStrToTree(s);
 
-    tests.testBool(pt[0][0]->getString() == "zero");
-    tests.testBool(pt[1][0]->getString() == "one");
-    tests.testBool(pt[2][0]->getString() == "two");
-    tests.testBool(pt[3][0]->getString() == "three");
+    tests.testBool(pt[0][0].getString() == "zero");
+    tests.testBool(pt[1][0].getString() == "one");
+    tests.testBool(pt[2][0].getString() == "two");
+    tests.testBool(pt[3][0].getString() == "three");
 
-    tests.testBool(pt["two"][0]->getString() == "two");
-    tests.testBool(pt["three"][0]->getString() == "three");
+    tests.testBool(pt["two"][0].getString() == "two");
+    tests.testBool(pt["three"][0].getString() == "three");
 
-    tests.testBool(pt["0"][0]->getString() == "zero");
-    tests.testBool(pt["1"][0]->getString() == "one");
-    tests.testBool(pt["2"][0]->getString() == "two");
-    tests.testBool(pt["3"][0]->getString() == "three");
+    tests.testBool(pt["0"][0].getString() == "zero");
+    tests.testBool(pt["1"][0].getString() == "one");
+    tests.testBool(pt["2"][0].getString() == "two");
+    tests.testBool(pt["3"][0].getString() == "three");
 
-    tests.testBool(pt["four"][0][0][0]->isEmptyTuple());
+    tests.testBool(pt["four"][0][0][0].isEmptyTuple());
 }
 
 void testFailsTuple() {
@@ -249,7 +249,7 @@ void testIndexing() {
             ]
         )"""";
         auto pt = testStrToTree(s);
-        return pt[0][0][0][0]->getNumber() == "20";
+        return pt[0][0][0][0].getNumber() == "20";
     });
     tests.testBlock({
         string s = R""""(
@@ -260,7 +260,7 @@ void testIndexing() {
             ]
         )"""";
         auto pt = testStrToTree(s);
-        return pt[0][0][0][0]->getNumber() == "20";
+        return pt[0][0][0][0].getNumber() == "20";
     });
     tests.testBlock({
         string s = R""""(
@@ -271,7 +271,7 @@ void testIndexing() {
             ]
         )"""";
         auto pt = testStrToTree(s);
-        return pt[0][0][1][0][0][0]->getName() == "two";
+        return pt[0][0][1][0][0][0].getName() == "two";
     });
     tests.testBlock({
         string s = R""""(
@@ -282,7 +282,118 @@ void testIndexing() {
             ]
         )"""";
         auto pt = testStrToTree(s);
-        return pt[0][0][1][0][1][0]->getName() == "two";
+        return pt[0][0][1][0][1][0].getName() == "two";
+    });
+}
+
+void testIterate() {
+    string s = R""""(
+            zero: 0,
+            one: 1,
+            two: 2 [zero: 0],
+            3,4.0,5,
+        )"""";
+    auto pt = testStrToTree(s);
+    tests.testBlock({
+        for (int i = 0; i < pt.size(); i++) {
+            if (i != pt[i][0].getNumber()) return false;
+        }
+        return true;
+    });
+
+    tests.testBlock({
+        int i = 0;
+        for (auto [name, statement] : pt) { // note the auto
+            if (i != statement[0].getNumber()) { return false; }
+            i++;
+        }
+        return true;
+    });
+
+    tests.testBlock({
+        int i = 0;
+        for (auto& [name, statement] : pt) { // note the auto &
+            if (i != statement[0].getNumber()) { return false; }
+            i++;
+        }
+        return true;
+    });
+}
+
+void testConstructStatement() {
+    estd::clone_ptr<Element> e;
+    tests.testBlock({
+        e = Element::Statement();
+        return true;
+    });
+    tests.testBlock({
+        try {
+            e->back();
+        } catch (...) { return true; }
+        return false;
+    });
+    tests.testBlock({
+        try {
+            e->front();
+        } catch (...) { return true; }
+        return false;
+    });
+    tests.testBlock({
+        e->pushBack(Element(Token("2")));
+        if(e->front().getNumber() != 2) return false;
+        e->pushBack(Element(Token("3")));
+        if(e->back().getNumber() != 3) return false;
+        e->pushFront(Element(Token("1")));
+        if(e->front().getNumber() != 1) return false;
+        e->pushFront(Element(Token("0")));
+        if(e->front().getNumber() != 0) return false;
+        if(e->back().getNumber() != 3) return false;
+        return true;
+    });
+    tests.testBlock({
+        for (int i = 0; i < 4; i++){
+            if(e[i].getNumber() != i) return false;
+        }
+        return true;
+    });
+}
+
+void testConstructTuple() {
+    estd::clone_ptr<Element> e;
+    // auto st = Element::Statement();
+    tests.testBlock({
+        e = Element::Tuple();
+        return true;
+    });
+    tests.testBlock({
+        try {
+            e->back();
+        } catch (...) { return true; }
+        return false;
+    });
+    tests.testBlock({
+        try {
+            e->front();
+        } catch (...) { return true; }
+        return false;
+    });
+    tests.testBlock({
+        e->pushBack(Element(Token("2")));
+        if(e->front().getNumber() != 2) return false;
+        e->pushBack(Element(Token("3")));
+        if(e->back().getNumber() != 3) return false;
+        e->pushFront(Element(Token("1")));
+        if(e->front().getNumber() != 1) return false;
+        e->pushFront(Element(Token("0")));
+        if(e->front().getNumber() != 0) return false;
+        if(e->back().getNumber() != 3) return false;
+        return true;
+    });
+    tests.testBlock({
+        for (int i = 0; i < 4; i++){
+            if(e[i].getNumber() != i) return false;
+        }
+        return true;
     });
 }
 
@@ -292,5 +403,8 @@ int main() {
     tupleStructureTests2();
     testFailsTuple();
     testIndexing();
+    testIterate();
+    testConstructStatement();
+    testConstructTuple();
     std::cout << tests.getStats() << std::endl;
 }

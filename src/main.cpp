@@ -45,5 +45,5 @@ int main() {
     ParseTreeBuilder ptb;
     auto pt = ptb.buildParseTree(tokens);
     cout << endl << pt.getDiagnosticString() << endl;
-    cout << pt[0][1]["hello"][0][0][0]->getNumber() << endl;
+    cout << pt[0][1]["hello"][0][0][0].getNumber() << endl;
 }

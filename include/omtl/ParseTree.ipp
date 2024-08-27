@@ -78,15 +78,17 @@ Element ParseTreeBuilder::parseStatement(std::vector<Token>& tokens, size_t& i) 
         if (i >= tokens.size()) { break; }    // done
         if (tokens[i].getRaw() == ",") break; // done
         if (tokens[i].getRaw() == "]") break; // done
-        if (tokens[i].getRaw() == ":") {throw std::runtime_error("statement did not expect a colon at: " + tokens[i].location);}
+        if (tokens[i].getRaw() == ":") {
+            throw std::runtime_error("statement did not expect a colon at: " + tokens[i].location);
+        }
         if (tokens[i].getRaw() == "[") {
             Element elem = parseTuple(tokens, i);
-            result.statement->push_back({std::to_string(i), elem});
+            result.statement->push_back({std::to_string(result.statement->size()), elem});
         } else {
             Element elem;
             elem.value = tokens[i];
             elem.location = tokens[i].location;
-            result.statement->push_back({std::to_string(i), elem});
+            result.statement->push_back({std::to_string(result.statement->size()), elem});
             i++;
         }
     }
@@ -116,14 +118,12 @@ Element ParseTreeBuilder::parseTuple(std::vector<Token>& tokens, size_t& i, bool
     }
     for (;;) {
         if (isRoot) {
-            if (i >= tokens.size()) {
-                break;
-            }
+            if (i >= tokens.size()) { break; }
             if (tokens[i].getRaw() == "]") {
-                throw std::runtime_error("tuple too many closing braces: " + result.location); 
+                throw std::runtime_error("tuple too many closing braces: " + result.location);
                 break;
             }
-        }else{
+        } else {
             if (i >= tokens.size()) { throw std::runtime_error("tuple did not end: " + result.location); } // error
             if (tokens[i].getRaw() == "]") {
                 i++;
@@ -143,7 +143,7 @@ Element ParseTreeBuilder::parseTuple(std::vector<Token>& tokens, size_t& i, bool
             if (!tokens[i].isName()) // TODO: support strings, only names are supported for now
                 throw std::runtime_error("unexpected tag in tuple at: " + tokens[i].location);
             if (i + 2 >= tokens.size() ||
-                tokens[i + 2].getRaw() == ","){ // we have a named item with an empty statement under it.
+                tokens[i + 2].getRaw() == ",") { // we have a named item with an empty statement under it.
                 //throw std::runtime_error("empty statement in tuple at: " + tokens[i].location);
                 //skip over it instead
                 i += 3;
@@ -153,6 +153,7 @@ Element ParseTreeBuilder::parseTuple(std::vector<Token>& tokens, size_t& i, bool
             i += 2;
             statement = parseStatement(tokens, i);
         } else {
+            name = result.tuple->size();
             statement = parseStatement(tokens, i);
         }
         result.tuple->push_back(std::pair<std::string, Element>(name, statement));
@@ -162,24 +163,33 @@ Element ParseTreeBuilder::parseTuple(std::vector<Token>& tokens, size_t& i, bool
 }
 
 Element ParseTreeBuilder::buildParseTree(std::vector<Token> tokens) {
-    // tokens.insert(tokens.begin(), Token("[", "START"));
-    // tokens.push_back(Token("]", "END"));
     size_t startIndex = 0;
     return parseTuple(tokens, startIndex, true);
 }
 
 Element::Element() {}
 
-Element::Element(Token v) { value = v; }
-
-Element::Element(std::deque<std::pair<std::string, Element>> t) { tuple = t; }
-
-Element::Element(std::deque<Element> s) { 
-    statement = std::deque<std::pair<std::string, Element>>();
-    for(size_t i = 0; i < s.size(); i++){
-        statement->push_back({std::to_string(i), s[i]});  
-    }
+Element Element::Tuple(std::deque<std::pair<std::string, Element>> t) {
+    Element e;
+    e.tuple = t;
+    return e;
 }
+
+Element Element::Tuple(std::deque<Element> s) {
+    Element e;
+    e.tuple = std::deque<std::pair<std::string, Element>>();
+    for (size_t i = 0; i < s.size(); i++) { e.tuple->push_back({std::to_string(i), s[i]}); }
+    return e;
+}
+
+Element Element::Statement(std::deque<Element> s) {
+    Element e;
+    e.statement = std::deque<std::pair<std::string, Element>>();
+    for (size_t i = 0; i < s.size(); i++) { e.statement->push_back({std::to_string(i), s[i]}); }
+    return e;
+}
+
+Element::Element(Token v) { value = v; }
 
 Element::Element(const Element& e) {
     tuple = e.tuple;
@@ -229,27 +239,31 @@ std::string Element::getDiagnosticString() {
     return "unknown type";
 }
 
-estd::clone_ptr<Element> Element::operator[](std::string name) {
+Element Element::operator[](std::string name) {
     Element& e = *this;
 
     if (e.tuple != nullptr) {
         for (size_t i = 0; i < e.tuple->size(); i++) {
             if (e.tuple[i].first == name || name == std::to_string(i)) { return e.tuple[i].second; }
         }
+    } else if (e.statement != nullptr) {
+        for (size_t i = 0; i < e.statement->size(); i++) {
+            if (e.statement[i].first == name || name == std::to_string(i)) { return e.tuple[i].second; }
+        }
     }
-    return nullptr;
+    throw std::runtime_error("tuple does not contain element "+name+ ": " + e.location);
 }
 
-estd::clone_ptr<Element> Element::operator[](size_t id) {
+Element Element::operator[](size_t id) {
     Element& e = *this;
     if (e.tuple != nullptr) {
-        if (id >= e.tuple->size()) return nullptr;
+        if (id >= e.tuple->size()) throw std::runtime_error("tuple does not contain element "+std::to_string(id)+ ": " + e.location);
         return e.tuple[id].second;
     } else if (e.statement != nullptr) {
-        if (id >= e.statement->size()) return nullptr;
+        if (id >= e.statement->size()) throw std::runtime_error("statement does not contain element "+std::to_string(id)+ ": " + e.location);
         return e.statement[id].second;
     }
-    return nullptr;
+    throw std::runtime_error("Element is not a tuple or statement: " + e.location);
 }
 
 size_t Element::size() {
@@ -296,12 +310,12 @@ bool Element::contains(size_t id) {
 }
 
 Element Element::popFront() {
-    if (tuple != nullptr) {
+    if (tuple != nullptr && tuple->size() != 0) {
         Element t = tuple->front().second;
         tuple->pop_front();
         return t;
     }
-    if (statement != nullptr) {
+    if (statement != nullptr && statement->size() != 0) {
         Element t = statement->front().second;
         statement->pop_front();
         return t;
@@ -310,61 +324,80 @@ Element Element::popFront() {
 }
 void Element::pushFront(Element e) { pushFront("", e); }
 void Element::pushFront(std::string n, Element e) {
-    if (tuple != nullptr) { 
-        if(n == ""){
-            tuple->push_front({std::to_string(tuple->size()), e}); 
-        }else{
-            if(n[0] >= '0' && n[0] <= '9'){
-                throw std::runtime_error("cannot add a number label to a tuple");
-            }
-            tuple->push_front({n, e}); 
+    if (tuple != nullptr) {
+        if (n == "") {
+            tuple->push_front({std::to_string(tuple->size()), e});
+        } else {
+            if (n[0] >= '0' && n[0] <= '9') { throw std::runtime_error("cannot add a number label to a tuple"); }
+            tuple->push_front({n, e});
         }
-    }
-    if (statement != nullptr) { 
-        if(n != ""){
-            throw std::runtime_error("cannot add a label to a statement");
-        }
-        statement->push_front({std::to_string(statement->size()), e}); 
+    } else if (statement != nullptr) {
+        if (n != "") { throw std::runtime_error("cannot add a label to a statement"); }
+        statement->push_front({std::to_string(statement->size()), e});
+    } else {
+        throw std::runtime_error("cannot push element");
     }
 }
 Element Element::popBack() {
-    if (tuple != nullptr) {
+    if (tuple != nullptr && tuple->size() != 0) {
         Element t = tuple->back().second;
         tuple->pop_back();
         return t;
     }
-    if (statement != nullptr) {
+    if (statement != nullptr && statement->size() != 0) {
         Element t = statement->back().second;
         statement->pop_back();
         return t;
     }
     throw std::runtime_error("No elements to pop");
 }
+
+Element Element::front() {
+    if (tuple != nullptr && tuple->size() != 0) {
+        Element t = tuple->front().second;
+        return t;
+    }
+    if (statement != nullptr && statement->size() != 0) {
+        Element t = statement->front().second;
+        return t;
+    }
+    throw std::runtime_error("No elements to pop");
+}
+
+Element Element::back() {
+    if (tuple != nullptr && tuple->size() != 0) {
+        Element t = tuple->back().second;
+        return t;
+    }
+    if (statement != nullptr && statement->size() != 0) {
+        Element t = statement->back().second;
+        return t;
+    }
+    throw std::runtime_error("No elements to pop");
+}
+
 void Element::pushBack(Element e) { pushBack("", e); }
 void Element::pushBack(std::string n, Element e) {
-    if (tuple != nullptr) { 
-        if(n == ""){
-            tuple->push_back({std::to_string(tuple->size()), e}); 
-        }else{
-            if(n[0] >= '0' && n[0] <= '9'){
-                throw std::runtime_error("cannot add a number label to a tuple");
-            }
-            tuple->push_back({n, e}); 
+    if (tuple != nullptr) {
+        if (n == "") {
+            tuple->push_back({std::to_string(tuple->size()), e});
+        } else {
+            if (n[0] >= '0' && n[0] <= '9') { throw std::runtime_error("cannot add a number label to a tuple"); }
+            tuple->push_back({n, e});
         }
-    }
-    if (statement != nullptr) { 
-        if(n != ""){
-            throw std::runtime_error("cannot add a label to a statement");
-        }
-        statement->push_back({std::to_string(statement->size()), e}); 
+    } else if (statement != nullptr) {
+        if (n != "") { throw std::runtime_error("cannot add a label to a statement"); }
+        statement->push_back({std::to_string(statement->size()), e});
+    } else {
+        throw std::runtime_error("cannot push element");
     }
 }
 
-void Element::popBack(size_t n) {
+void Element::popBack(size_t n) { // TODO: make a faster implementation
     for (size_t i = 0; i < n; i++) popBack();
 }
 
-void Element::popFront(size_t n) {
+void Element::popFront(size_t n) { // TODO: make a faster implementation
     for (size_t i = 0; i < n; i++) popFront();
 }
 
@@ -403,7 +436,7 @@ std::string Element::getName() { return getToken().getName(); }
 estd::BigDec Element::getNumber() { return getToken().getNumber(); }
 std::string Element::getValue() { return getToken().getValue(); }
 std::string Element::getRaw() { return getToken().getRaw(); }
-inline Element& Element::getSingleElement() {
+Element& Element::getSingleElement() {
     if (statement != nullptr && statement->size() == 1) { return statement[0].second; }
     return *this;
 }
