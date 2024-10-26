@@ -57,17 +57,17 @@ namespace omtl {
         inline Element& getSingleElement();
 
     public:
-        static Element Tuple(std::deque<std::pair<std::string, Element>> in);
-        static Element Statement(std::deque<Element> in = {});
-        static Element Tuple(std::deque<Element> in = {}); // a function that is a "constructor"
-        Element();
-        Element(Token v);
-        Element(const Element& e);
+        inline static Element Tuple(std::deque<std::pair<std::string, Element>> in);
+        inline static Element Statement(std::deque<Element> in = {});
+        inline static Element Tuple(std::deque<Element> in = {}); // a function that is a "constructor"
+        inline Element();
+        inline Element(Token v);
+        inline Element(const Element& e);
         inline ~Element() {}
 
         std::string location = "";
 
-        std::string getDiagnosticString();
+        inline std::string getDiagnosticString();
 
 
         inline decltype(auto) begin() {
@@ -99,56 +99,56 @@ namespace omtl {
             }
         }
 
-        size_t size();
-        bool onlyContains(std::set<std::string> names);
-        bool contains(std::string name);
-        bool contains(size_t id);
-        Element operator[](std::string name);
-        Element operator[](size_t id);
+        inline size_t size();
+        inline bool onlyContains(std::set<std::string> names);
+        inline bool contains(std::string name);
+        inline bool contains(size_t id);
+        inline Element operator[](std::string name);
+        inline Element operator[](size_t id);
 
-        Element slice(size_t left, size_t right = SIZE_MAX);
-        Element front();
-        Element back();
-        Element popFront();
-        Element popBack();
-        void popFront(size_t n);
-        void popBack(size_t n);
-        void pushFront(Element e);
-        void pushBack(Element e);
-        void pushFront(std::string n, Element e);
-        void pushBack(std::string n, Element e);
+        inline Element slice(size_t left, size_t right = SIZE_MAX);
+        inline Element front();
+        inline Element back();
+        inline Element popFront();
+        inline Element popBack();
+        inline void popFront(size_t n);
+        inline void popBack(size_t n);
+        inline void pushFront(Element e);
+        inline void pushBack(Element e);
+        inline void pushFront(std::string n, Element e);
+        inline void pushBack(std::string n, Element e);
 
-        bool isTuple();
-        bool isEmptyTuple();
-        bool isStatement();
-        bool isToken();
+        inline bool isTuple();
+        inline bool isEmptyTuple();
+        inline bool isStatement();
+        inline bool isToken();
 
-        bool isString();
-        bool isComment();
-        bool isName();
-        bool isNumber();
-        bool isValue();
-        bool isRaw();
+        inline bool isString();
+        inline bool isComment();
+        inline bool isName();
+        inline bool isNumber();
+        inline bool isValue();
+        inline bool isRaw();
 
-        Token getToken();
-        std::string getString();
-        std::string getEscapedString();
-        std::string getComment();
-        std::string getName();
-        estd::BigDec getNumber();
-        std::string getValue();
-        std::string getRaw();
+        inline Token getToken();
+        inline std::string getString();
+        inline std::string getEscapedString();
+        inline std::string getComment();
+        inline std::string getName();
+        inline estd::BigDec getNumber();
+        inline std::string getValue();
+        inline std::string getRaw();
     };
 
     class ParseTreeBuilder {
     private:
-        size_t findMatchingBracket(std::vector<Token>& tokens, size_t i);
-        bool isTuple(std::vector<Token>& tokens, size_t i);
-        Element parseStatement(std::vector<Token>& tokens, size_t& i);
-        Element parseTuple(std::vector<Token>& tokens, size_t& i, bool isRoot = false);
+        inline size_t findMatchingBracket(std::vector<Token>& tokens, size_t i);
+        inline bool isTuple(std::vector<Token>& tokens, size_t i);
+        inline Element parseStatement(std::vector<Token>& tokens, size_t& i);
+        inline Element parseTuple(std::vector<Token>& tokens, size_t& i, bool isRoot = false);
 
     public:
-        Element buildParseTree(std::vector<Token> vector);
+        inline Element buildParseTree(std::vector<Token> vector);
     };
 
 #include <omtl/ParseTree.ipp>

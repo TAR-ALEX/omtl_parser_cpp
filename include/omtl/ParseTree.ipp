@@ -153,7 +153,7 @@ Element ParseTreeBuilder::parseTuple(std::vector<Token>& tokens, size_t& i, bool
             i += 2;
             statement = parseStatement(tokens, i);
         } else {
-            name = result.tuple->size();
+            name = std::to_string(result.tuple->size());
             statement = parseStatement(tokens, i);
         }
         result.tuple->push_back(std::pair<std::string, Element>(name, statement));

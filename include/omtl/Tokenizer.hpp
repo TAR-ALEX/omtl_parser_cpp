@@ -58,8 +58,8 @@ namespace omtl {
         uint8_t dataType = Token::name;
         std::string paddingAfter = "";
 
-        Token() {}
-        Token(std::string s) {
+        inline Token() {}
+        inline Token(std::string s) {
             rawValue = s;
             dataType = Token::name;
             if (rawValue.size() >= 2 && rawValue[0] == '\"' && rawValue[1] == '\"') dataType = Token::string;
@@ -71,31 +71,31 @@ namespace omtl {
                 } catch (...) { dataType = Token::name; } // failed to parse, not a number
             }
         }
-        Token(std::string s, std::string c) : Token(s) { location = c; }
+        inline Token(std::string s, std::string c) : Token(s) { location = c; }
 
-        std::string getDiagnosticString();
-        std::string getRaw();
-        std::string getValue();
+        inline std::string getDiagnosticString();
+        inline std::string getRaw();
+        inline std::string getValue();
 
-        bool isString() { return dataType == Token::string; }
-        bool isComment() { return dataType == Token::comment; }
-        bool isName() { return dataType == Token::name; }
-        bool isNumber() { return dataType == Token::number; }
-        bool isValue() { return isString() || isNumber() || isName(); }
+        inline bool isString() { return dataType == Token::string; }
+        inline bool isComment() { return dataType == Token::comment; }
+        inline bool isName() { return dataType == Token::name; }
+        inline bool isNumber() { return dataType == Token::number; }
+        inline bool isValue() { return isString() || isNumber() || isName(); }
 
-        std::string getString();
-        std::string getEscapedString();
-        std::string getComment();
-        std::string getName();
-        estd::BigDec getNumber();
+        inline std::string getString();
+        inline std::string getEscapedString();
+        inline std::string getComment();
+        inline std::string getName();
+        inline estd::BigDec getNumber();
     };
 
     class Tokenizer {
     public:
         bool storeCommentsAsPadding = true;
-        std::vector<Token> tokenize(std::istream& infile, std::string filename = "");
-        std::vector<Token> tokenize(std::string filename);
-        std::string reconstruct(std::vector<Token>& tokens);
+        inline std::vector<Token> tokenize(std::istream& infile, std::string filename = "");
+        inline std::vector<Token> tokenize(std::string filename);
+        inline std::string reconstruct(std::vector<Token>& tokens);
     };
 
 #include <omtl/Tokenizer.ipp>
